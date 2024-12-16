@@ -1,14 +1,61 @@
+<!-- templates/result.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>处理中</title>
-    <meta http-equiv="refresh" content="2">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>聊天结果</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sindresorhus/github-markdown-css@4.0.0/github-markdown.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github.min.css">
+    <style>
+        body {
+            background-color: #f6f8fa;
+        }
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            margin-top: 20px;
+        }
+        .metadata {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .status.completed {
+            background-color: #e6ffed;
+            color: #28a745;
+        }
+        .status.pending {
+            background-color: #fff5cc;
+            color: #d9a600;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <h2>正在处理您的问题...</h2>
-    <p>页面将自动刷新</p>
+<div class="markdown-body">
+    <div class="metadata">
+        <span class="status {{.status}}">{{.status}}</span>
+        <span style="float: right">{{.time}}</span>
+    </div>
+    <div>{{.answer}}</div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/lib/highlight.min.js"></script>
+<script>
+    // 代码高亮
+    document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightBlock(block);
+    });
+</script>
 </body>
 </html>

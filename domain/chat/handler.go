@@ -8,7 +8,9 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/russross/blackfriday/v2"
 	"github.com/sashabaranov/go-openai"
+	"html/template"
 	"io"
 	"log/slog"
 	"net/http"
@@ -137,7 +139,8 @@ func Result(c *gin.Context) {
 	}
 
 	// 显示结果页面
+	answerHTML := template.HTML(blackfriday.Run([]byte(history.Content)))
 	c.HTML(http.StatusOK, "result.html", gin.H{
-		"answer": history.Content,
+		"answer": answerHTMLg,
 	})
 }
