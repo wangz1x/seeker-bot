@@ -34,7 +34,7 @@ func Chat(c *gin.Context) {
 		return
 	}
 
-	slog.Info("receive message: %s\nfrom user: %s", msg.Content, msg.FromUserName)
+	slog.Info("receive message", "content", msg.Content, "user", msg.FromUserName, "msgId", msg.MsgId)
 	h := db.History{
 		UserID:  msg.FromUserName,
 		Role:    "user",
