@@ -8,11 +8,12 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"seeker-bot/m/conf"
 	"sort"
 	"strings"
 )
 
-const token = "your_token" // 替换成你在微信开发者平台设置的token
+var token = conf.GvaConfig.App.Token
 
 func Verify(c *gin.Context) {
 	signature := c.Query("signature")
