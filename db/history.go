@@ -12,6 +12,7 @@ type History struct {
 	Role      string    `gorm:"column:role;type:varchar(100);not null" json:"role"`
 	Content   string    `gorm:"column:content;type:text" json:"content"`
 	CreatedAt time.Time `gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP" json:"created_at"`
+	MsgID     string    `gorm:"column:msg_id;type:varchar(500);not null" json:"msg_id"`
 }
 
 // TableName 指定表名

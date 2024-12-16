@@ -14,7 +14,7 @@ type Message struct {
 	CreateTime   int64    `xml:"CreateTime"`
 	MsgType      string   `xml:"MsgType"`
 	Content      string   `xml:"Content"`
-	MsgId        int64    `xml:"MsgId"`
+	MsgId        string   `xml:"MsgId"`
 	MsgDataId    string   `xml:"MsgDataId"`
 	Idx          string   `xml:"Idx"`
 }

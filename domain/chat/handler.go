@@ -6,6 +6,7 @@ package chat
 
 import (
 	"encoding/xml"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 	"io"
@@ -35,13 +36,26 @@ func Chat(c *gin.Context) {
 	}
 
 	slog.Info("receive message", "content", msg.Content, "user", msg.FromUserName, "msgId", msg.MsgId)
+	var count int64
+	result := db.DB.Where("user_id = ? and msg_id = ?", msg.FromUserName, msg.MsgId).Count(&count)
+	if result.Error != nil {
+		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
+		return
+	}
+
+	if count > 0 {
+		// 说明是重试的，直接忽略，啥都不干
+		return
+	}
+
 	h := db.History{
 		UserID:  msg.FromUserName,
 		Role:    "user",
 		Content: msg.Content,
+		MsgID:   msg.MsgId,
 	}
 
-	result := db.DB.Create(&h)
+	result = db.DB.Create(&h)
 	if result.Error != nil {
 		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
 		return
@@ -64,29 +78,39 @@ func Chat(c *gin.Context) {
 		})
 	}
 
-	defaultConfig := openai.DefaultConfig(token)
-	defaultConfig.BaseURL = baseURL
-	client := openai.NewClientWithConfig(defaultConfig)
-	response, err := client.CreateChatCompletion(c, openai.ChatCompletionRequest{
-		Model:    "deepseek-chat",
-		Messages: messages,
-		Stream:   false,
-	})
-	if err != nil {
-		responseXML(c, err.Error(), msg.FromUserName, msg.ToUserName)
-		return
+	resultURL := fmt.Sprintf("%s/chat/result/%s", "http://106.54.124.217:80", msg.MsgId)
+
+	done := make(chan bool)
+
+	var response openai.ChatCompletionResponse
+	go func() {
+		defaultConfig := openai.DefaultConfig(token)
+		defaultConfig.BaseURL = baseURL
+		client := openai.NewClientWithConfig(defaultConfig)
+		response, err = client.CreateChatCompletion(c, openai.ChatCompletionRequest{
+			Model:    "deepseek-chat",
+			Messages: messages,
+			Stream:   false,
+		})
+		if err == nil {
+			h = db.History{
+				UserID:  msg.FromUserName,
+				Role:    response.Choices[0].Message.Role,
+				Content: response.Choices[0].Message.Content,
+				MsgID:   msg.MsgId,
+			}
+			_ = db.DB.Create(&h)
+		}
+		done <- true
+	}()
+
+	select {
+	case <-done:
+		responseXML(c, response.Choices[0].Message.Content, msg.FromUserName, msg.ToUserName)
+	case <-time.After(time.Second * 3):
+		responseXML(c, fmt.Sprintf("正在思考中，请稍后<a href='%s'>查看</a>", resultURL), msg.FromUserName, msg.ToUserName)
 	}
 
-	h = db.History{
-		UserID:  msg.FromUserName,
-		Role:    response.Choices[0].Message.Role,
-		Content: response.Choices[0].Message.Content,
-	}
-	result = db.DB.Create(&h)
-	if result.Error != nil {
-		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
-		return
-	}
 	responseXML(c, h.Content, msg.FromUserName, msg.ToUserName)
 }
 
@@ -99,4 +123,21 @@ func responseXML(c *gin.Context, content, toUserName, fromUserName string) {
 		Content:      content,
 	}
 	c.XML(http.StatusOK, msg)
+}
+
+func Result(c *gin.Context) {
+	msgId := c.Param("msgId")
+
+	var history db.History
+	result := db.DB.Where("msg_id = ? and role = ?", msgId, "assistant").First(&history)
+	if result.Error != nil {
+		// 如果还在处理中，显示等待页面
+		c.HTML(http.StatusOK, "waiting.html", gin.H{})
+		return
+	}
+
+	// 显示结果页面
+	c.HTML(http.StatusOK, "result.html", gin.H{
+		"answer": history.Content,
+	})
 }

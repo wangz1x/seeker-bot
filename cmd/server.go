@@ -42,6 +42,10 @@ func server() {
 		chat.Chat(c)
 	})
 
+	r.POST("/chat/result/:msgId", func(c *gin.Context) {
+		chat.Result(c)
+	})
+
 	slog.Info("http server start")
 	err := r.Run(conf.GvaConfig.App.Addr)
 	if err != nil {
