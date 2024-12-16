@@ -16,6 +16,13 @@ import (
 var token = conf.GvaConfig.App.Token
 
 func Auth(c *gin.Context) {
+	path := c.Request.URL.Path
+
+	if strings.HasPrefix(path, "/chat/result/") {
+		c.Next()
+		return
+	}
+
 	signature := c.Query("signature")
 	timestamp := c.Query("timestamp")
 	nonce := c.Query("nonce")
