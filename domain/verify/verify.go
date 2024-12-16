@@ -19,7 +19,7 @@ func Verify(c *gin.Context) {
 	signature := c.Query("signature")
 	timestamp := c.Query("timestamp")
 	nonce := c.Query("nonce")
-	echoStr := c.Query("echoStr")
+	echoStr := c.Query("echostr")
 	// 验证签名
 	if !verifySignature(signature, timestamp, nonce) {
 		c.String(403, "Invalid signature")
