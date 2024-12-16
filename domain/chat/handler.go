@@ -10,17 +10,19 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"io"
 	"log/slog"
+	"net/http"
 	"seeker-bot/m/db"
+	"time"
 )
 
-const baseURL = "https://api.deepseek.com/chat/completions"
+const baseURL = "https://api.deepseek.com"
 const token = "sk-43675ee878c74c6d91ad5ba4500fcdb1"
 
 func Chat(c *gin.Context) {
 
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.String(400, err.Error())
+		responseXML(c, err.Error(), "", "")
 		return
 	}
 	defer c.Request.Body.Close()
@@ -28,7 +30,7 @@ func Chat(c *gin.Context) {
 	var msg Message
 	err = xml.Unmarshal(body, &msg)
 	if err != nil {
-		c.String(400, err.Error())
+		responseXML(c, err.Error(), "", "")
 		return
 	}
 
@@ -41,14 +43,14 @@ func Chat(c *gin.Context) {
 
 	result := db.DB.Create(&h)
 	if result.Error != nil {
-		c.String(500, result.Error.Error())
+		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
 		return
 	}
 
 	var records []db.History
 	result = db.DB.Where("user_id = ?", msg.FromUserName).Order("created_at desc").Limit(10).Find(&records)
 	if result.Error != nil {
-		c.String(500, result.Error.Error())
+		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
 		return
 	}
 
@@ -71,7 +73,7 @@ func Chat(c *gin.Context) {
 		Stream:   false,
 	})
 	if err != nil {
-		c.String(500, err.Error())
+		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
 		return
 	}
 
@@ -82,8 +84,19 @@ func Chat(c *gin.Context) {
 	}
 	result = db.DB.Create(&h)
 	if result.Error != nil {
-		c.String(500, result.Error.Error())
+		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
 		return
 	}
-	c.String(200, h.Content)
+	responseXML(c, h.Content, msg.FromUserName, msg.ToUserName)
+}
+
+func responseXML(c *gin.Context, content, toUserName, fromUserName string) {
+	msg := Message{
+		ToUserName:   toUserName,
+		FromUserName: fromUserName,
+		CreateTime:   time.Now().Unix(),
+		MsgType:      "text",
+		Content:      content,
+	}
+	c.XML(http.StatusOK, msg)
 }
