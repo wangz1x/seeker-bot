@@ -1,0 +1,6 @@
+app: # 应用基本配置
+  env: local # 环境名称
+  addr: 0.0.0.0:8082
+  appname: seeker-bot # 应用名称
+  mode: debug
+  token: Tpn0RBFhsWom3JfR6YFtuYZEF0G9FcIl
