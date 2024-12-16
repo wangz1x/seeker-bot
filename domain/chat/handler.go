@@ -69,7 +69,7 @@ func Chat(c *gin.Context) {
 	client := openai.NewClientWithConfig(defaultConfig)
 	response, err := client.CreateChatCompletion(c, openai.ChatCompletionRequest{
 		Model:    "deepseek-chat",
-		Messages: []openai.ChatCompletionMessage{},
+		Messages: messages,
 		Stream:   false,
 	})
 	if err != nil {
