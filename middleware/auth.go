@@ -1,8 +1,8 @@
-// verify - 2024/12/16
+// auth - 2024/12/16
 // Author: wangzx
 // Description:
 
-package verify
+package middleware
 
 import (
 	"crypto/sha1"
@@ -15,17 +15,16 @@ import (
 
 var token = conf.GvaConfig.App.Token
 
-func Verify(c *gin.Context) {
+func Auth(c *gin.Context) {
 	signature := c.Query("signature")
 	timestamp := c.Query("timestamp")
 	nonce := c.Query("nonce")
-	echoStr := c.Query("echostr")
 	// 验证签名
 	if !verifySignature(signature, timestamp, nonce) {
 		c.String(403, "Invalid signature")
+		c.Abort()
 		return
 	}
-	c.String(200, echoStr)
 }
 
 func verifySignature(signature, timestamp, nonce string) bool {
