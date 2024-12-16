@@ -73,7 +73,7 @@ func Chat(c *gin.Context) {
 		Stream:   false,
 	})
 	if err != nil {
-		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
+		responseXML(c, err.Error(), msg.FromUserName, msg.ToUserName)
 		return
 	}
 
