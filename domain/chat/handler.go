@@ -141,6 +141,6 @@ func Result(c *gin.Context) {
 	// 显示结果页面
 	answerHTML := template.HTML(blackfriday.Run([]byte(history.Content)))
 	c.HTML(http.StatusOK, "result.html", gin.H{
-		"answer": answerHTMLg,
+		"answer": answerHTML,
 	})
 }

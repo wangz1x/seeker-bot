@@ -5,6 +5,7 @@ go 1.22.7
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.23.0
+	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/sashabaranov/go-openai v1.36.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
