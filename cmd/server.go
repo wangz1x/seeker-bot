@@ -33,6 +33,7 @@ func server() {
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())
 	r.Use(middleware.Auth)
+	r.LoadHTMLGlob("templates/*")
 
 	r.GET("/seeker", func(c *gin.Context) {
 		verify.Verify(c)
@@ -42,7 +43,7 @@ func server() {
 		chat.Chat(c)
 	})
 
-	r.POST("/chat/result/:msgId", func(c *gin.Context) {
+	r.GET("/chat/result/:msgId", func(c *gin.Context) {
 		chat.Result(c)
 	})
 
