@@ -39,3 +39,7 @@ func Load() {
 	}
 	slog.Info("config loaded", "config_path", viper.ConfigFileUsed())
 }
+
+func init() {
+	Load()
+}

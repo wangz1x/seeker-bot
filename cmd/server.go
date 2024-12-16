@@ -22,7 +22,6 @@ var serverCmd = &cobra.Command{
 	Long:  `None`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		conf.Load()
 		server()
 	},
 }
