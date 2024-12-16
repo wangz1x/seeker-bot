@@ -37,7 +37,7 @@ func Chat(c *gin.Context) {
 
 	slog.Info("receive message", "content", msg.Content, "user", msg.FromUserName, "msgId", msg.MsgId)
 	var count int64
-	result := db.DB.Where("user_id = ? and msg_id = ?", msg.FromUserName, msg.MsgId).Count(&count)
+	result := db.DB.Model(&db.History{}).Where("user_id = ? and msg_id = ?", msg.FromUserName, msg.MsgId).Count(&count)
 	if result.Error != nil {
 		responseXML(c, result.Error.Error(), msg.FromUserName, msg.ToUserName)
 		return
