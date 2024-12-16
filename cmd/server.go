@@ -31,7 +31,7 @@ func server() {
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())
 
-	r.GET("/verify", func(c *gin.Context) {
+	r.GET("/seeker", func(c *gin.Context) {
 		verify.Verify(c)
 	})
 
